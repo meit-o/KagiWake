@@ -1022,7 +1022,7 @@ export default function App() {
       <section className="current-user-panel" aria-label="ログイン中のユーザー">
         <span>ログイン中</span>
         <div className="current-user-buttons">
-          <span className="is-active" style={{ "--member-color": myMembership?.color || "#24524a" }}>
+          <span className="is-active" style={{ "--member-color": myMembership?.color || "#2563eb" }}>
             <UserRound size={16} />
             <span>{myMembership?.displayName || user.username}</span>
           </span>
@@ -1250,7 +1250,7 @@ export default function App() {
             <div className="reserving-as">
               <span
                 className="mini-color"
-                style={{ "--member-color": myMembership?.color || "#24524a" }}
+                style={{ "--member-color": myMembership?.color || "#2563eb" }}
               />
               <span>{myMembership?.displayName || user.username}として予約します</span>
             </div>
