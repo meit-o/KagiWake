@@ -5,6 +5,8 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { CosmosClient } from "@azure/cosmos";
+import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(__dirname, "data");
@@ -12,6 +14,23 @@ const storePath = path.join(dataDir, "store.json");
 const distDir = path.join(__dirname, "dist");
 
 const memberColors = ["#0f766e", "#c2410c", "#2563eb", "#7c3aed", "#ca8a04", "#be123c", "#475569", "#0891b2"];
+
+const firebaseProjectId = process.env.FIREBASE_PROJECT_ID || "";
+const firebaseClientEmail = process.env.FIREBASE_CLIENT_EMAIL || "";
+const firebasePrivateKey = (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+const firebaseAdminAuth =
+  firebaseProjectId && firebaseClientEmail && firebasePrivateKey
+    ? getAuth(
+        getApps()[0] ||
+          initializeApp({
+            credential: cert({
+              projectId: firebaseProjectId,
+              clientEmail: firebaseClientEmail,
+              privateKey: firebasePrivateKey
+            })
+          })
+      )
+    : null;
 
 const defaultStore = {
   users: [],
@@ -165,6 +184,23 @@ function verifyPassword(password, salt, hash) {
 
 function generateToken() {
   return crypto.randomBytes(24).toString("hex");
+}
+
+function firebaseUsername(decodedToken) {
+  const preferred = cleanText(decodedToken.name || decodedToken.email?.split("@")[0] || "Googleユーザー", 24);
+  return preferred || "Googleユーザー";
+}
+
+function uniqueUsername(store, preferred, userId) {
+  const base = preferred.slice(0, 24) || "Googleユーザー";
+  let username = base;
+  let suffix = 2;
+  while (store.users.some((user) => user.id !== userId && user.username.toLowerCase() === username.toLowerCase())) {
+    const suffixText = ` (${suffix})`;
+    username = `${base.slice(0, 24 - suffixText.length)}${suffixText}`;
+    suffix += 1;
+  }
+  return username;
 }
 
 function generateInviteCode(existingCodes) {
@@ -410,6 +446,49 @@ app.post("/api/auth/login", async (request, response, next) => {
     const group = findGroupByUserId(store, user.id);
     response.json({ token, user: publicUser(user), group: group ? publicGroup(group, request) : null });
   } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/auth/firebase", async (request, response, next) => {
+  try {
+    if (!firebaseAdminAuth) {
+      throw httpError(503, "Firebase認証のサーバー設定がありません。");
+    }
+
+    const idToken = typeof request.body.idToken === "string" ? request.body.idToken : "";
+    if (!idToken) throw httpError(401, "Firebaseの認証情報がありません。");
+
+    const decodedToken = await firebaseAdminAuth.verifyIdToken(idToken);
+    const store = await readStore();
+    let user = store.users.find((item) => item.firebaseUid === decodedToken.uid);
+
+    if (!user) {
+      user = {
+        id: crypto.randomUUID(),
+        username: uniqueUsername(store, firebaseUsername(decodedToken)),
+        firebaseUid: decodedToken.uid,
+        authProvider: "google",
+        createdAt: new Date().toISOString()
+      };
+      store.users.push(user);
+    }
+
+    const token = generateToken();
+    store.sessions.push({ token, userId: user.id, createdAt: new Date().toISOString() });
+    await writeStore(store);
+
+    const group = findGroupByUserId(store, user.id);
+    response.json({ token, user: publicUser(user), group: group ? publicGroup(group, request) : null });
+  } catch (error) {
+    if (
+      error.code === "auth/id-token-expired" ||
+      error.code === "auth/argument-error" ||
+      error.code === "auth/invalid-id-token"
+    ) {
+      next(httpError(401, "Google認証の有効期限が切れています。もう一度ログインしてください。"));
+      return;
+    }
     next(error);
   }
 });

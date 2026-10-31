@@ -13,8 +13,9 @@
   --line: #d7dee8;
   --surface: #ffffff;
   --surface-soft: #fbfcfe;
-  --green: #2563eb;
-  --green-dark: #1e3a8a;
+  --brand: #2563eb;
+  --brand-dark: #1e3a8a;
+  --brand-soft: #eff6ff;
   --amber: #f59e0b;
   --rose: #e11d48;
   --blue: #2563eb;
@@ -31,8 +32,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(226, 234, 248, 0.7) 0%, rgba(243, 245, 248, 1) 42%, rgba(248, 250, 252, 1) 100%);
+  background: linear-gradient(180deg, #eaf1ff 0%, #f3f5f8 34%, #f8fafc 100%);
 }
 
 button,
@@ -70,6 +70,29 @@ a:focus-visible {
   width: min(720px, 100%);
   margin: 0 auto;
   padding: 14px 16px 32px;
+  animation: page-enter 420ms cubic-bezier(0.2, 0.7, 0.25, 1) both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .app-header {
@@ -95,6 +118,12 @@ a:focus-visible {
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
   flex: 0 0 auto;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.brand-mark:hover {
+  transform: translateY(-1px) rotate(-3deg);
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.24);
 }
 
 .eyebrow {
@@ -141,6 +170,12 @@ h3 {
   border: 1px solid rgba(37, 99, 235, 0.24);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.vehicle-strip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px rgba(30, 58, 138, 0.14);
 }
 
 .vehicle-icon {
@@ -150,9 +185,9 @@ h3 {
   width: 56px;
   height: 56px;
   color: #ffffff;
-  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
   border-radius: 999px;
-  box-shadow: 0 8px 18px rgba(23, 59, 53, 0.32);
+  box-shadow: 0 8px 18px rgba(30, 58, 138, 0.2);
 }
 
 .vehicle-copy {
@@ -163,7 +198,7 @@ h3 {
 
 .vehicle-copy strong {
   overflow-wrap: anywhere;
-  color: var(--green-dark);
+  color: var(--brand-dark);
   font-size: 1.18rem;
   line-height: 1.35;
 }
@@ -288,6 +323,7 @@ h3 {
 
 .view-panel.is-active {
   display: block;
+  animation: panel-enter 280ms cubic-bezier(0.2, 0.7, 0.25, 1) both;
 }
 
 .panel-heading {
@@ -296,7 +332,7 @@ h3 {
   justify-content: space-between;
   gap: 10px;
   padding: 16px 16px 12px;
-  border-bottom: 1px solid #edf1ed;
+  border-bottom: 1px solid #e6ebf2;
 }
 
 .icon-group {
@@ -310,7 +346,7 @@ h3 {
   height: 40px;
   place-items: center;
   color: var(--ink);
-  background: #f5f7f4;
+  background: #f1f5f9;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -324,8 +360,8 @@ h3 {
 
 .icon-button.accent {
   color: #ffffff;
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--brand);
+  border-color: var(--brand);
 }
 
 .icon-button.danger {
@@ -372,11 +408,17 @@ h3 {
   border: 1px solid #dbe3ec;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.day-cell:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: #93b4f8;
+  box-shadow: 0 5px 12px rgba(30, 58, 138, 0.1);
 }
 
 .day-cell.is-outside {
-  color: #929d96;
+  color: #94a3b8;
   background: #f1f5f9;
 }
 
@@ -385,12 +427,12 @@ h3 {
 }
 
 .day-cell.is-selected {
-  border-color: var(--green);
-  box-shadow: inset 0 0 0 2px var(--green);
+  border-color: var(--brand);
+  box-shadow: inset 0 0 0 2px var(--brand);
 }
 
 .day-cell.has-booking {
-  background: #f1f8f5;
+  background: var(--brand-soft);
   border-color: #bfdbfe;
 }
 
@@ -498,7 +540,7 @@ h3 {
 
 .mini-booking.is-locked {
   cursor: default;
-  color: #647067;
+  color: #64748b;
   background: #f1f5f9;
 }
 
@@ -518,8 +560,8 @@ h3 {
   padding: 8px 12px;
   color: #ffffff;
   white-space: nowrap;
-  background: var(--green);
-  border: 1px solid var(--green);
+  background: var(--brand);
+  border: 1px solid var(--brand);
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 800;
@@ -529,7 +571,7 @@ h3 {
   margin: 0 12px 12px;
   padding: 12px;
   background: #ffffff;
-  border: 1px solid #e3e8e2;
+  border: 1px solid #e2e8f0;
   border-radius: var(--radius);
 }
 
@@ -548,7 +590,7 @@ h3 {
 .board-heading > span {
   flex: 0 0 auto;
   padding: 4px 8px;
-  color: var(--green-dark);
+  color: var(--brand-dark);
   background: #eff6ff;
   border-radius: 999px;
   font-size: 0.78rem;
@@ -566,10 +608,16 @@ h3 {
   gap: 10px;
   align-items: start;
   padding: 11px;
-  background: #fbfcfa;
+  background: #fbfcfe;
   border: 1px solid color-mix(in srgb, var(--member-color, #475569) 24%, var(--line));
   border-left: 5px solid var(--member-color, #475569);
   border-radius: var(--radius);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.calendar-reservation-row:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(30, 58, 138, 0.1);
 }
 
 .locked-owner {
@@ -626,7 +674,7 @@ legend,
   min-height: 48px;
   padding: 9px 10px;
   color: var(--ink);
-  background: #f6f8f5;
+  background: #f8fafc;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -660,8 +708,8 @@ legend,
 .field textarea:focus,
 .member-editor input:focus,
 .add-member-row input:focus {
-  border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(36, 82, 74, 0.12);
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .field textarea {
@@ -691,7 +739,7 @@ legend,
 .toggle-row input {
   width: 20px;
   height: 20px;
-  accent-color: var(--green);
+  accent-color: var(--brand);
 }
 
 .time-section {
@@ -717,8 +765,8 @@ legend,
 
 .time-mode button.is-active {
   color: #ffffff;
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--brand);
+  border-color: var(--brand);
 }
 
 .time-picker {
@@ -752,19 +800,24 @@ legend,
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 800;
+  transition: color 140ms ease, background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.hour-list button:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 .hour-list button.is-picked,
 .hour-list button:hover:not(:disabled) {
   color: #ffffff;
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--brand);
+  border-color: var(--brand);
 }
 
 .hour-list button:disabled {
   cursor: not-allowed;
-  color: #a3ada7;
-  background: #eef1ee;
+  color: #94a3b8;
+  background: #eef2f7;
 }
 
 .time-summary {
@@ -785,7 +838,7 @@ legend,
 .time-summary button {
   min-height: 36px;
   padding: 6px 10px;
-  color: var(--green-dark);
+  color: var(--brand-dark);
   background: #ffffff;
   border: 1px solid #cbd5e1;
   border-radius: var(--radius-sm);
@@ -830,15 +883,15 @@ legend,
 
 .primary-button {
   color: #ffffff;
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--brand);
+  border-color: var(--brand);
 }
 
 .primary-button:hover:not(:disabled) {
-  background: var(--green-dark);
-  border-color: var(--green-dark);
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
   transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(23, 59, 53, 0.28);
+  box-shadow: 0 10px 20px rgba(30, 58, 138, 0.2);
 }
 
 .primary-button:active:not(:disabled) {
@@ -878,6 +931,12 @@ legend,
   border: 1px solid color-mix(in srgb, var(--member-color, #475569) 26%, var(--line));
   border-left: 5px solid var(--member-color, #475569);
   border-radius: var(--radius);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.booking-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(30, 58, 138, 0.1);
 }
 
 .booking-main {
@@ -934,7 +993,7 @@ legend,
   min-height: 146px;
   color: var(--muted);
   background: #f8fafc;
-  border: 1px dashed #cbd5cd;
+  border: 1px dashed #cbd5e1;
   border-radius: var(--radius);
 }
 
@@ -1006,13 +1065,13 @@ legend,
 
 .view-nav button.is-active {
   color: #ffffff;
-  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
-  box-shadow: 0 8px 18px rgba(23, 59, 53, 0.32);
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  box-shadow: 0 8px 18px rgba(30, 58, 138, 0.24);
 }
 
 .view-nav button:hover:not(.is-active) {
   color: var(--ink);
-  background: #f1f4f0;
+  background: #f1f5f9;
   transform: translateY(-1px);
 }
 
@@ -1140,6 +1199,7 @@ legend,
   border-radius: calc(var(--radius) + 4px);
   box-shadow: var(--shadow);
   text-align: center;
+  animation: page-enter 420ms cubic-bezier(0.2, 0.7, 0.25, 1) both;
 }
 
 .auth-card .brand-mark {
@@ -1157,7 +1217,7 @@ legend,
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   padding: 4px;
-  background: #f1f4f0;
+  background: #f1f5f9;
   border-radius: var(--radius-sm);
 }
 
@@ -1169,6 +1229,7 @@ legend,
   border-radius: 6px;
   cursor: pointer;
   font-weight: 800;
+  transition: color 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
 .auth-tabs button.is-active {
@@ -1209,7 +1270,7 @@ legend,
 }
 
 .onboard-choice:hover {
-  border-color: var(--green);
+  border-color: var(--brand);
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(22, 32, 29, 0.1);
 }
@@ -1233,7 +1294,7 @@ legend,
 }
 
 .invite-label {
-  color: var(--green-dark);
+  color: var(--brand-dark);
   font-size: 0.8rem;
   font-weight: 800;
 }
@@ -1286,7 +1347,7 @@ legend,
   padding: 0 14px;
   color: #ffffff;
   white-space: nowrap;
-  background: var(--green);
+  background: var(--brand);
   border: 0;
   cursor: pointer;
   font-weight: 800;
@@ -1295,7 +1356,7 @@ legend,
 }
 
 .copy-field button:hover {
-  background: var(--green-dark);
+  background: var(--brand-dark);
 }
 
 .copy-field button.is-copied {
@@ -1307,7 +1368,7 @@ legend,
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  color: var(--green-dark);
+  color: var(--brand-dark);
   background: #eff6ff;
   border: 1px solid #cbd5e1;
   border-radius: var(--radius-sm);
@@ -1347,6 +1408,35 @@ legend,
 .danger-outline {
   color: #be123c;
   border-color: #fecdd3;
+}
+
+.google-mark {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  color: #4285f4;
+  background: #ffffff;
+  border: 1px solid #dbe3ec;
+  border-radius: 50%;
+  font-family: Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.auth-card > .ghost-button {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @media (min-width: 860px) {
