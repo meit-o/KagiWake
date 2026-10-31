@@ -21,6 +21,7 @@ import {
   Users,
   X
 } from "lucide-react";
+import { firebaseConfigured, signInWithGoogle, signOutFromFirebase } from "./firebase";
 
 const TOKEN_KEY = "rapan-token";
 
@@ -484,6 +485,7 @@ export default function App() {
       setAuthError("ユーザー名は2文字以上で入力してください。");
       return;
     }
+
     if (password.length < 4) {
       setAuthError("パスワードは4文字以上で入力してください。");
       return;
@@ -515,6 +517,34 @@ export default function App() {
     }
   }
 
+  async function submitGoogleAuth() {
+    setAuthError("");
+    setAuthBusy(true);
+    try {
+      const google = await signInWithGoogle();
+      const data = await apiRequest("", "/api/auth/firebase", {
+        method: "POST",
+        body: { idToken: google.idToken }
+      });
+
+      try {
+        window.localStorage.setItem(TOKEN_KEY, data.token);
+      } catch {
+        /* ignore */
+      }
+
+      setToken(data.token);
+      setUser(data.user);
+      setGroup(data.group);
+      setAuthForm({ username: "", password: "" });
+      if (!data.group) setOnboardMode(joinCodeDraft ? "join" : "choose");
+    } catch (error) {
+      setAuthError(error.message || "Googleログインに失敗しました。");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
   async function logout() {
     try {
       await apiRequest(token, "/api/auth/logout", { method: "POST" });
@@ -527,6 +557,7 @@ export default function App() {
     } catch {
       /* ignore */
     }
+    await signOutFromFirebase().catch(() => {});
 
     setToken("");
     setUser(null);
@@ -836,6 +867,13 @@ export default function App() {
               <span>{authBusy ? "処理中" : authMode === "signup" ? "アカウントを作成" : "ログイン"}</span>
             </button>
           </form>
+
+          {firebaseConfigured ? (
+            <button className="ghost-button" type="button" onClick={submitGoogleAuth} disabled={authBusy}>
+              <span className="google-mark" aria-hidden="true">G</span>
+              <span>Googleでログイン</span>
+            </button>
+          ) : null}
         </div>
       </div>
     );
@@ -980,7 +1018,7 @@ export default function App() {
     <div className="app-shell">
       <header className="app-header">
         <div className="brand-area">
-          <div className="brand-mark transition-transform duration-300 hover:scale-105 hover:rotate-3" aria-hidden="true">
+          <div className="brand-mark" aria-hidden="true">
             <Car size={26} />
           </div>
           <div>
@@ -989,7 +1027,7 @@ export default function App() {
           </div>
         </div>
 
-        <div className="vehicle-strip transition-shadow duration-300 hover:shadow-xl">
+        <div className="vehicle-strip">
           <div className="vehicle-icon" aria-hidden="true">
             <Car size={26} />
           </div>
@@ -1096,7 +1134,7 @@ export default function App() {
                   key={day.value}
                   type="button"
                   className={[
-                    "day-cell transition-transform duration-150 hover:-translate-y-0.5",
+                    "day-cell",
                     day.inMonth ? "" : "is-outside",
                     isToday ? "is-today" : "",
                     isSelected ? "is-selected" : "",
@@ -1189,7 +1227,7 @@ export default function App() {
                   return (
                     <article
                       key={reservation.id}
-                      className="calendar-reservation-row transition-shadow duration-200 hover:shadow-md"
+                      className="calendar-reservation-row"
                       style={{ "--member-color": member?.color || "#475569" }}
                     >
                       <div className="booking-main">
@@ -1388,7 +1426,7 @@ export default function App() {
                 return (
                   <article
                     key={reservation.id}
-                    className="booking-card transition-shadow duration-200 hover:shadow-md"
+                    className="booking-card"
                     style={{ "--member-color": member?.color || "#475569" }}
                   >
                     <div className="booking-main">
