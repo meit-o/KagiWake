@@ -13,7 +13,7 @@ const dataDir = path.join(__dirname, "data");
 const storePath = path.join(dataDir, "store.json");
 const distDir = path.join(__dirname, "dist");
 
-const memberColors = ["#0f766e", "#c2410c", "#2563eb", "#7c3aed", "#ca8a04", "#be123c", "#475569", "#0891b2"];
+const memberColors = ["#2563eb", "#c2410c", "#7c3aed", "#ca8a04", "#be123c", "#475569", "#0891b2", "#0f766e"];
 
 const firebaseProjectId = process.env.FIREBASE_PROJECT_ID || "";
 const firebaseClientEmail = process.env.FIREBASE_CLIENT_EMAIL || "";

@@ -1,41 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  AlertCircle,
-  CalendarDays,
-  Car,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Clock3,
-  Copy,
-  Edit3,
-  ListChecks,
-  Lock,
-  LogOut,
-  Plus,
-  Save,
-  Settings,
-  Share2,
-  Trash2,
-  UserRound,
-  Users,
-  X
-} from "lucide-react";
+import { Alert, Badge, Button, ButtonGroup, Card, Form, InputGroup, Nav, Spinner } from "react-bootstrap";
 import { firebaseConfigured, signInWithGoogle, signOutFromFirebase } from "./firebase";
 
 const TOKEN_KEY = "rapan-token";
 
 const viewItems = [
-  { id: "calendar", label: "予定", icon: CalendarDays },
-  { id: "reserve", label: "予約", icon: Plus },
-  { id: "list", label: "一覧", icon: ListChecks },
-  { id: "settings", label: "設定", icon: Settings }
+  { id: "calendar", label: "予定", icon: "calendar3" },
+  { id: "reserve", label: "予約", icon: "plus-lg" },
+  { id: "list", label: "一覧", icon: "list-check" },
+  { id: "settings", label: "設定", icon: "gear" }
 ];
 
 const dayNames = ["日", "月", "火", "水", "木", "金", "土"];
 const fullDayNames = ["日", "月", "火", "水", "木", "金", "土"];
 const startHourOptions = Array.from({ length: 17 }, (_, index) => index + 6);
 const endHourOptions = Array.from({ length: 17 }, (_, index) => index + 7);
+
+function AppIcon({ name, size, className = "" }) {
+  return <i className={`bi bi-${name} ${className}`.trim()} aria-hidden="true" style={size ? { fontSize: size } : undefined} />;
+}
 
 function pad(value) {
   return String(value).padStart(2, "0");
@@ -241,9 +224,9 @@ function InviteShareCard({ group, busy, onGenerate, onShare, onCopy, copied }) {
     return (
       <div className="invite-box">
         <span className="invite-label">招待コードはまだありません</span>
-        <button className="primary-button" type="button" onClick={onGenerate} disabled={busy}>
+        <Button variant="primary" className="primary-button" type="button" onClick={onGenerate} disabled={busy}>
           <span>{busy ? "発行中" : "招待コードを発行する"}</span>
-        </button>
+        </Button>
       </div>
     );
   }
@@ -253,23 +236,22 @@ function InviteShareCard({ group, busy, onGenerate, onShare, onCopy, copied }) {
       <span className="invite-label">招待コード</span>
       <strong className="invite-code">{group.inviteCode}</strong>
 
-      <label className="copy-field">
-        <span className="sr-only">招待リンク</span>
-        <input type="text" readOnly value={group.inviteLink || ""} onFocus={(event) => event.target.select()} />
-        <button type="button" onClick={onCopy} className={copied ? "is-copied" : ""}>
-          <Copy size={15} />
+      <InputGroup className="copy-field">
+        <Form.Control type="text" aria-label="招待リンク" readOnly value={group.inviteLink || ""} onFocus={(event) => event.target.select()} />
+        <Button variant="primary" type="button" onClick={onCopy} className={copied ? "is-copied" : ""}>
+          <AppIcon name="clipboard" size={15} />
           <span>{copied ? "コピー済み" : "コピー"}</span>
-        </button>
-      </label>
+        </Button>
+      </InputGroup>
 
       <div className="share-actions">
-        <button className="primary-button" type="button" onClick={onShare}>
-          <Share2 size={18} />
+        <Button variant="primary" className="primary-button" type="button" onClick={onShare}>
+          <AppIcon name="share" size={18} />
           <span>共有する</span>
-        </button>
-        <button className="ghost-button" type="button" onClick={onGenerate} disabled={busy}>
+        </Button>
+        <Button variant="outline-secondary" className="ghost-button" type="button" onClick={onGenerate} disabled={busy}>
           <span>{busy ? "発行中" : "コードを再発行する"}</span>
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -794,7 +776,7 @@ export default function App() {
   if (bootLoading) {
     return (
       <div className="loading-screen">
-        <Car size={28} />
+        <Spinner animation="border" role="status" aria-label="読み込み中" variant="primary" />
         <span>読み込み中…</span>
       </div>
     );
@@ -803,50 +785,62 @@ export default function App() {
   if (!user) {
     return (
       <div className="auth-shell">
-        <div className="auth-card">
+        <Card className="auth-card">
+          <Card.Body>
           <div className="brand-mark" aria-hidden="true">
-            <Car size={26} />
+            <AppIcon name="car-front-fill" size={26} />
           </div>
           <h1>共有車予約</h1>
           <p className="auth-lead">家族や仲間と車のスケジュールを共有しましょう。</p>
 
-          <div className="auth-tabs">
-            <button
-              type="button"
-              className={authMode === "signup" ? "is-active" : ""}
+          <Nav variant="pills" className="auth-tabs" aria-label="アカウント操作">
+            <Nav.Item>
+              <Nav.Link
+                as="button"
+                type="button"
+                active={authMode === "signup"}
               onClick={() => {
                 setAuthMode("signup");
                 setAuthError("");
               }}
             >
               はじめる
-            </button>
-            <button
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link
+              as="button"
               type="button"
-              className={authMode === "login" ? "is-active" : ""}
+              active={authMode === "login"}
               onClick={() => {
                 setAuthMode("login");
                 setAuthError("");
               }}
             >
               ログイン
-            </button>
-          </div>
+              </Nav.Link>
+            </Nav.Item>
+          </Nav>
 
-          <form className="auth-form" onSubmit={submitAuth}>
-            <label className="field">
-              <span>ユーザーネーム</span>
-              <input
+          <Form className="auth-form" onSubmit={submitAuth}>
+            <Form.Group className="field" controlId="auth-username">
+              <Form.Label>ユーザーネーム</Form.Label>
+              <InputGroup>
+                <InputGroup.Text aria-hidden="true"><AppIcon name="person" /></InputGroup.Text>
+                <Form.Control
                 value={authForm.username}
                 onChange={(event) => setAuthForm((current) => ({ ...current, username: event.target.value }))}
                 placeholder="例: taro"
                 maxLength={24}
                 autoComplete="username"
               />
-            </label>
-            <label className="field">
-              <span>パスワード</span>
-              <input
+              </InputGroup>
+            </Form.Group>
+            <Form.Group className="field" controlId="auth-password">
+              <Form.Label>パスワード</Form.Label>
+              <InputGroup>
+                <InputGroup.Text aria-hidden="true"><AppIcon name="lock" /></InputGroup.Text>
+                <Form.Control
                 type="password"
                 value={authForm.password}
                 onChange={(event) => setAuthForm((current) => ({ ...current, password: event.target.value }))}
@@ -854,27 +848,30 @@ export default function App() {
                 maxLength={64}
                 autoComplete={authMode === "signup" ? "new-password" : "current-password"}
               />
-            </label>
+              </InputGroup>
+            </Form.Group>
 
             {authError ? (
-              <div className="notice error">
-                <AlertCircle size={18} />
+              <Alert variant="danger" className="notice error">
+                <AppIcon name="exclamation-circle" size={18} />
                 <span>{authError}</span>
-              </div>
+              </Alert>
             ) : null}
 
-            <button className="primary-button" type="submit" disabled={authBusy}>
+            <Button variant="primary" className="primary-button w-100" type="submit" disabled={authBusy}>
+              {authBusy ? <Spinner size="sm" animation="border" aria-hidden="true" /> : <AppIcon name={authMode === "signup" ? "person-plus" : "box-arrow-in-right"} />}
               <span>{authBusy ? "処理中" : authMode === "signup" ? "アカウントを作成" : "ログイン"}</span>
-            </button>
-          </form>
+            </Button>
+          </Form>
 
           {firebaseConfigured ? (
-            <button className="ghost-button" type="button" onClick={submitGoogleAuth} disabled={authBusy}>
-              <span className="google-mark" aria-hidden="true">G</span>
+            <Button variant="outline-secondary" className="ghost-button google-button" type="button" onClick={submitGoogleAuth} disabled={authBusy}>
+              {authBusy ? <Spinner size="sm" animation="border" aria-hidden="true" /> : <AppIcon name="google" className="google-mark" />}
               <span>Googleでログイン</span>
-            </button>
+            </Button>
           ) : null}
-        </div>
+          </Card.Body>
+        </Card>
       </div>
     );
   }
@@ -882,89 +879,97 @@ export default function App() {
   if (!group) {
     return (
       <div className="auth-shell">
-        <div className="auth-card">
+        <Card className="auth-card">
+          <Card.Body>
           <div className="brand-mark" aria-hidden="true">
-            <Users size={26} />
+            <AppIcon name="people-fill" size={26} />
           </div>
           <h1>グループを設定</h1>
           <p className="auth-lead">{user.username}さん、車を共有するグループを作るか、招待されたグループに参加してください。</p>
 
           {onboardMode === "choose" ? (
             <div className="onboard-choices">
-              <button className="onboard-choice" type="button" onClick={() => setOnboardMode("create")}>
-                <strong>グループを作る</strong>
-                <span>新しく車の予約グループを作成します</span>
-              </button>
-              <button className="onboard-choice" type="button" onClick={() => setOnboardMode("join")}>
-                <strong>グループに入る</strong>
-                <span>招待コードやリンクで参加します</span>
-              </button>
+              <Button variant="light" className="onboard-choice" type="button" onClick={() => setOnboardMode("create")}>
+                <AppIcon name="plus-circle" size={20} />
+                <span className="onboard-choice-copy"><strong>グループを作る</strong><span>新しく車の予約グループを作成します</span></span>
+                <AppIcon name="chevron-right" />
+              </Button>
+              <Button variant="light" className="onboard-choice" type="button" onClick={() => setOnboardMode("join")}>
+                <AppIcon name="people" size={20} />
+                <span className="onboard-choice-copy"><strong>グループに入る</strong><span>招待コードやリンクで参加します</span></span>
+                <AppIcon name="chevron-right" />
+              </Button>
             </div>
           ) : null}
 
           {onboardMode === "create" ? (
-            <form className="auth-form" onSubmit={submitCreateGroup}>
-              <label className="field">
-                <span>車名・家族の名前</span>
-                <input
+            <Form className="auth-form" onSubmit={submitCreateGroup}>
+              <Form.Group className="field" controlId="onboard-group-name">
+                <Form.Label>車名・家族の名前</Form.Label>
+                <Form.Control
                   value={groupNameDraft}
                   onChange={(event) => setGroupNameDraft(event.target.value)}
                   placeholder="例: プリウス"
                   maxLength={28}
                   autoFocus
                 />
-              </label>
+              </Form.Group>
 
               {onboardError ? (
-                <div className="notice error">
-                  <AlertCircle size={18} />
+                <Alert variant="danger" className="notice error">
+                  <AppIcon name="exclamation-circle" size={18} />
                   <span>{onboardError}</span>
-                </div>
+                </Alert>
               ) : null}
 
-              <button className="primary-button" type="submit" disabled={onboardBusy}>
+              <Button variant="primary" className="primary-button w-100" type="submit" disabled={onboardBusy}>
+                {onboardBusy ? <Spinner size="sm" animation="border" aria-hidden="true" /> : <AppIcon name="plus-lg" />}
                 <span>{onboardBusy ? "作成中" : "グループを作成"}</span>
-              </button>
-              <button className="ghost-button" type="button" onClick={() => setOnboardMode("choose")}>
+              </Button>
+              <Button variant="outline-secondary" className="ghost-button w-100" type="button" onClick={() => setOnboardMode("choose")}>
+                <AppIcon name="arrow-left" />
                 <span>戻る</span>
-              </button>
-            </form>
+              </Button>
+            </Form>
           ) : null}
 
           {onboardMode === "join" ? (
-            <form className="auth-form" onSubmit={submitJoinGroup}>
-              <label className="field">
-                <span>招待コード</span>
-                <input
+            <Form className="auth-form" onSubmit={submitJoinGroup}>
+              <Form.Group className="field" controlId="onboard-invite-code">
+                <Form.Label>招待コード</Form.Label>
+                <Form.Control
                   value={joinCodeDraft}
                   onChange={(event) => setJoinCodeDraft(event.target.value.toUpperCase())}
                   placeholder="例: AB12CD"
                   maxLength={12}
                   autoFocus
                 />
-              </label>
+              </Form.Group>
 
               {onboardError ? (
-                <div className="notice error">
-                  <AlertCircle size={18} />
+                <Alert variant="danger" className="notice error">
+                  <AppIcon name="exclamation-circle" size={18} />
                   <span>{onboardError}</span>
-                </div>
+                </Alert>
               ) : null}
 
-              <button className="primary-button" type="submit" disabled={onboardBusy}>
+              <Button variant="primary" className="primary-button w-100" type="submit" disabled={onboardBusy}>
+                {onboardBusy ? <Spinner size="sm" animation="border" aria-hidden="true" /> : <AppIcon name="box-arrow-in-right" />}
                 <span>{onboardBusy ? "参加中" : "グループに参加"}</span>
-              </button>
-              <button className="ghost-button" type="button" onClick={() => setOnboardMode("choose")}>
+              </Button>
+              <Button variant="outline-secondary" className="ghost-button w-100" type="button" onClick={() => setOnboardMode("choose")}>
+                <AppIcon name="arrow-left" />
                 <span>戻る</span>
-              </button>
-            </form>
+              </Button>
+            </Form>
           ) : null}
 
-          <button className="ghost-button auth-logout" type="button" onClick={logout}>
-            <LogOut size={16} />
+          <Button variant="outline-secondary" className="ghost-button auth-logout" type="button" onClick={logout}>
+            <AppIcon name="box-arrow-right" size={16} />
             <span>ログアウト</span>
-          </button>
-        </div>
+          </Button>
+          </Card.Body>
+        </Card>
       </div>
     );
   }
@@ -972,9 +977,10 @@ export default function App() {
   if (justCreated) {
     return (
       <div className="auth-shell">
-        <div className="auth-card">
+        <Card className="auth-card">
+          <Card.Body>
           <div className="brand-mark" aria-hidden="true">
-            <Check size={26} />
+            <AppIcon name="check-lg" size={26} />
           </div>
           <h1>グループを作成しました</h1>
           <p className="auth-lead">このコードやリンクを家族に共有すると、みんなで予約カレンダーを使えます。</p>
@@ -989,23 +995,26 @@ export default function App() {
           />
 
           {notice ? (
-            <div className={`notice ${notice.type}`} role="status">
-              {notice.type === "success" ? <Check size={18} /> : <AlertCircle size={18} />}
+            <Alert variant={notice.type === "success" ? "success" : "danger"} className={`notice ${notice.type}`} role="status">
+              {notice.type === "success" ? <AppIcon name="check-lg" size={18} /> : <AppIcon name="exclamation-circle" size={18} />}
               <span>{notice.message}</span>
-            </div>
+            </Alert>
           ) : null}
 
-          <button
-            className="primary-button"
+          <Button
+            variant="primary"
+            className="primary-button w-100"
             type="button"
             onClick={() => {
               setJustCreated(null);
               setNotice(null);
             }}
           >
+            <AppIcon name="arrow-right" />
             <span>アプリを使いはじめる</span>
-          </button>
-        </div>
+          </Button>
+          </Card.Body>
+        </Card>
       </div>
     );
   }
@@ -1019,7 +1028,7 @@ export default function App() {
       <header className="app-header">
         <div className="brand-area">
           <div className="brand-mark" aria-hidden="true">
-            <Car size={26} />
+            <AppIcon name="car-front-fill" size={26} />
           </div>
           <div>
             <p className="eyebrow">共有車カレンダー</p>
@@ -1029,92 +1038,97 @@ export default function App() {
 
         <div className="vehicle-strip">
           <div className="vehicle-icon" aria-hidden="true">
-            <Car size={26} />
+            <AppIcon name="car-front-fill" size={26} />
           </div>
           <div className="vehicle-copy">
-            <span className="status-label">{currentUse ? "使用中" : "空き"}</span>
+            <Badge bg="primary" className="status-label">{currentUse ? "使用中" : "空き"}</Badge>
             <strong>{currentUse ? memberById.get(currentUse.userId)?.displayName || "予約あり" : "今日は空いています"}</strong>
             <span>{nextUse ? `次回 ${dateLabel(nextUse.startDate)}` : "次の予約はありません"}</span>
           </div>
         </div>
       </header>
 
-      <nav className="view-nav" aria-label="画面切り替え">
+      <Nav
+        as="nav"
+        variant="pills"
+        className="view-nav"
+        activeKey={activeView}
+        onSelect={(key) => key && setActiveView(key)}
+        aria-label="画面切り替え"
+      >
         {viewItems.map((item) => {
-          const Icon = item.icon;
           return (
-            <button
-              key={item.id}
-              type="button"
-              className={activeView === item.id ? "is-active" : ""}
-              onClick={() => setActiveView(item.id)}
-              aria-label={item.label}
-            >
-              <Icon size={18} />
+            <Nav.Item key={item.id}>
+              <Nav.Link as="button" type="button" eventKey={item.id} aria-label={item.label}>
+              <AppIcon name={item.icon} size={18} />
               <span>{item.label}</span>
-            </button>
+              </Nav.Link>
+            </Nav.Item>
           );
         })}
-      </nav>
+      </Nav>
 
       <section className="current-user-panel" aria-label="ログイン中のユーザー">
         <span>ログイン中</span>
         <div className="current-user-buttons">
           <span className="is-active" style={{ "--member-color": myMembership?.color || "#2563eb" }}>
-            <UserRound size={16} />
+            <AppIcon name="person-circle" size={16} />
             <span>{myMembership?.displayName || user.username}</span>
           </span>
-          <button type="button" className="logout-inline" onClick={logout}>
-            <LogOut size={16} />
+          <Button variant="outline-secondary" type="button" className="logout-inline" onClick={logout}>
+            <AppIcon name="box-arrow-right" size={16} />
             <span>ログアウト</span>
-          </button>
+          </Button>
         </div>
       </section>
 
       {notice ? (
-        <div className={`notice ${notice.type}`} role="status">
-          {notice.type === "success" ? <Check size={18} /> : <AlertCircle size={18} />}
+        <Alert variant={notice.type === "success" ? "success" : "danger"} className={`notice ${notice.type}`} role="status">
+          {notice.type === "success" ? <AppIcon name="check-lg" size={18} /> : <AppIcon name="exclamation-circle" size={18} />}
           <span>{notice.message}</span>
-        </div>
+        </Alert>
       ) : null}
 
       <main className="app-main" aria-busy={bootLoading}>
-        <section className={`panel calendar-panel view-panel ${activeView === "calendar" ? "is-active" : ""}`}>
-          <div className="panel-heading">
+        <Card as="section" className={`panel calendar-panel view-panel ${activeView === "calendar" ? "is-active" : ""}`}>
+          <Card.Header className="panel-heading">
             <div>
               <p className="eyebrow">今月の予定</p>
               <h2>{monthTitle(currentMonth)}</h2>
             </div>
             <div className="icon-group">
-              <button
+              <Button
+                variant="light"
                 className="icon-button"
                 type="button"
                 onClick={() => setCurrentMonth(addMonths(currentMonth, -1))}
                 aria-label="前の月"
                 title="前の月"
               >
-                <ChevronLeft size={20} />
-              </button>
-              <button
+                <AppIcon name="chevron-left" size={20} />
+              </Button>
+              <Button
+                variant="light"
                 className="icon-button"
                 type="button"
                 onClick={() => setCurrentMonth(startOfMonth(new Date()))}
                 aria-label="今月"
                 title="今月"
               >
-                <CalendarDays size={20} />
-              </button>
-              <button
+                <AppIcon name="calendar3" size={20} />
+              </Button>
+              <Button
+                variant="light"
                 className="icon-button"
                 type="button"
                 onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
                 aria-label="次の月"
                 title="次の月"
               >
-                <ChevronRight size={20} />
-              </button>
+                <AppIcon name="chevron-right" size={20} />
+              </Button>
             </div>
-          </div>
+          </Card.Header>
 
           <div className="week-row">
             {dayNames.map((day) => (
@@ -1179,10 +1193,11 @@ export default function App() {
                     const canManage = canManageReservation(reservation);
 
                     return (
-                      <button
+                      <Button
+                        variant="light"
                         key={reservation.id}
-                        type="button"
                         className={`mini-booking ${canManage ? "" : "is-locked"}`}
+                        type="button"
                         onClick={() => (canManage ? editReservation(reservation) : null)}
                         disabled={!canManage}
                       >
@@ -1191,16 +1206,16 @@ export default function App() {
                           style={{ "--member-color": memberById.get(reservation.userId)?.color || "#475569" }}
                         />
                         <span>{memberById.get(reservation.userId)?.displayName || "予約"}</span>
-                        {!canManage ? <Lock size={14} /> : null}
-                      </button>
+                        {!canManage ? <AppIcon name="lock-fill" size={14} /> : null}
+                      </Button>
                     );
                   })
                 )}
               </div>
-              <button className="quick-reserve-button" type="button" onClick={() => setActiveView("reserve")}>
-                <Plus size={16} />
+              <Button variant="primary" className="quick-reserve-button" type="button" onClick={() => setActiveView("reserve")}>
+                <AppIcon name="plus-lg" size={16} />
                 <span>この日に予約</span>
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -1215,7 +1230,7 @@ export default function App() {
 
             {calendarReservations.length === 0 ? (
               <div className="empty-state compact">
-                <CalendarDays size={22} />
+                <AppIcon name="calendar3" size={22} />
                 <strong>登録済みの予定はありません</strong>
               </div>
             ) : (
@@ -1237,29 +1252,30 @@ export default function App() {
                         </span>
                         <h3>{reservation.title || "車を使う"}</h3>
                         <p>
-                          <Clock3 size={15} />
+                          <AppIcon name="clock" size={15} />
                           {formatReservationRange(reservation)}
                         </p>
                         {reservation.notes ? <p className="note-text">{reservation.notes}</p> : null}
                       </div>
                       {canManage ? (
                         <div className="card-actions">
-                          <button className="icon-button" type="button" onClick={() => editReservation(reservation)} aria-label="編集" title="編集">
-                            <Edit3 size={18} />
-                          </button>
-                          <button
+                          <Button variant="light" className="icon-button" type="button" onClick={() => editReservation(reservation)} aria-label="編集" title="編集">
+                            <AppIcon name="pencil" size={18} />
+                          </Button>
+                          <Button
+                            variant="outline-danger"
                             className="icon-button danger"
                             type="button"
                             onClick={() => deleteReservation(reservation.id)}
                             aria-label="削除"
                             title="削除"
                           >
-                            <Trash2 size={18} />
-                          </button>
+                            <AppIcon name="trash3" size={18} />
+                          </Button>
                         </div>
                       ) : (
                         <div className="locked-owner" title="ほかの人の予約です">
-                          <Lock size={17} />
+                          <AppIcon name="lock-fill" size={17} />
                           <span>ほかの人</span>
                         </div>
                       )}
@@ -1269,22 +1285,22 @@ export default function App() {
               </div>
             )}
           </div>
-        </section>
+        </Card>
 
-        <section className={`panel form-panel view-panel ${activeView === "reserve" ? "is-active" : ""}`}>
-          <div className="panel-heading">
+        <Card as="section" className={`panel form-panel view-panel ${activeView === "reserve" ? "is-active" : ""}`}>
+          <Card.Header className="panel-heading">
             <div>
               <p className="eyebrow">予約入力</p>
               <h2>{editingId ? "予約編集" : "新しい予約"}</h2>
             </div>
             {editingId ? (
-              <button className="icon-button" type="button" onClick={() => resetForm()} aria-label="編集をやめる" title="編集をやめる">
-                <X size={20} />
-              </button>
+              <Button variant="light" className="icon-button" type="button" onClick={() => resetForm()} aria-label="編集をやめる" title="編集をやめる">
+                <AppIcon name="x-lg" size={20} />
+              </Button>
             ) : null}
-          </div>
+          </Card.Header>
 
-          <form className="reservation-form" onSubmit={submitReservation}>
+          <Form className="reservation-form" onSubmit={submitReservation}>
             <div className="reserving-as">
               <span
                 className="mini-color"
@@ -1293,37 +1309,37 @@ export default function App() {
               <span>{myMembership?.displayName || user.username}として予約します</span>
             </div>
 
-            <label className="field">
-              <span>予定名</span>
-              <input
+            <Form.Group className="field" controlId="reservation-title">
+              <Form.Label>予定名</Form.Label>
+              <Form.Control
                 value={form.title}
                 onChange={(event) => updateForm({ title: event.target.value })}
                 placeholder="帰省、買い物、送迎など"
                 maxLength={40}
               />
-            </label>
+            </Form.Group>
 
             <div className="date-grid">
-              <label className="field">
-                <span>開始</span>
-                <input type="date" value={form.startDate} onChange={(event) => updateForm({ startDate: event.target.value })} />
-              </label>
-              <label className="field">
-                <span>終了</span>
-                <input type="date" value={form.endDate} onChange={(event) => updateForm({ endDate: event.target.value })} />
-              </label>
+              <Form.Group className="field" controlId="reservation-start-date">
+                <Form.Label>開始</Form.Label>
+                <Form.Control type="date" value={form.startDate} onChange={(event) => updateForm({ startDate: event.target.value })} />
+              </Form.Group>
+              <Form.Group className="field" controlId="reservation-end-date">
+                <Form.Label>終了</Form.Label>
+                <Form.Control type="date" value={form.endDate} onChange={(event) => updateForm({ endDate: event.target.value })} />
+              </Form.Group>
             </div>
 
             <div className="time-section">
               <span className="field-label">時間</span>
-              <div className="time-mode">
-                <button type="button" className={form.allDay ? "is-active" : ""} onClick={setAllDayReservation}>
+              <ButtonGroup className="time-mode" role="group" aria-label="予約時間">
+                <Button variant={form.allDay ? "primary" : "outline-secondary"} type="button" onClick={setAllDayReservation} aria-pressed={form.allDay}>
                   終日
-                </button>
-                <button type="button" className={!form.allDay ? "is-active" : ""} onClick={startTimedReservation}>
+                </Button>
+                <Button variant={!form.allDay ? "primary" : "outline-secondary"} type="button" onClick={startTimedReservation} aria-pressed={!form.allDay}>
                   時間指定
-                </button>
-              </div>
+                </Button>
+              </ButtonGroup>
 
               {!form.allDay ? (
                 <div className="time-picker">
@@ -1332,9 +1348,9 @@ export default function App() {
                       <strong>
                         {form.startTime} - {form.endTime}
                       </strong>
-                      <button type="button" onClick={resetTimeSelection}>
+                      <Button variant="outline-secondary" type="button" onClick={resetTimeSelection}>
                         選び直す
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <>
@@ -1350,15 +1366,16 @@ export default function App() {
                           const isPickedEnd = selectedEndHour === hour;
 
                           return (
-                            <button
+                            <Button
                               key={hour}
+                              variant={isPickedStart || isPickedEnd ? "primary" : "outline-secondary"}
                               type="button"
                               className={isPickedStart || isPickedEnd ? "is-picked" : ""}
                               disabled={isDisabled}
                               onClick={() => (timeStage === "end" ? chooseEndHour(hour) : chooseStartHour(hour))}
                             >
                               {timeStage === "end" ? hourLabel(hour) : `${hourLabel(hour)}〜`}
-                            </button>
+                            </Button>
                           );
                         })}
                       </div>
@@ -1368,19 +1385,20 @@ export default function App() {
               ) : null}
             </div>
 
-            <label className="field">
-              <span>メモ</span>
-              <textarea
+            <Form.Group className="field" controlId="reservation-notes">
+              <Form.Label>メモ</Form.Label>
+              <Form.Control
+                as="textarea"
                 value={form.notes}
                 onChange={(event) => updateForm({ notes: event.target.value })}
                 placeholder="鍵、駐車場所、帰宅時間など"
                 maxLength={160}
               />
-            </label>
+            </Form.Group>
 
             {liveConflicts.length > 0 ? (
               <div className="conflict-box">
-                <AlertCircle size={18} />
+                <AppIcon name="exclamation-circle" size={18} />
                 <div>
                   <strong>重複あり</strong>
                   <span>{liveConflicts.map((reservation) => memberById.get(reservation.userId)?.displayName || "予約").join("、")}</span>
@@ -1389,33 +1407,34 @@ export default function App() {
             ) : null}
 
             <div className="form-actions">
-              <button className="primary-button" type="submit" disabled={!canSubmit}>
-                <Save size={18} />
+              <Button variant="primary" className="primary-button" type="submit" disabled={!canSubmit}>
+                {saving ? <Spinner size="sm" animation="border" aria-hidden="true" /> : null}
+                <AppIcon name="floppy" size={18} />
                 <span>{saving ? "保存中" : editingId ? "更新" : "予約"}</span>
-              </button>
-              <button className="ghost-button" type="button" onClick={() => resetForm()}>
-                <X size={18} />
+              </Button>
+              <Button variant="outline-secondary" className="ghost-button" type="button" onClick={() => resetForm()}>
+                <AppIcon name="x-lg" size={18} />
                 <span>リセット</span>
-              </button>
+              </Button>
             </div>
-          </form>
-        </section>
+          </Form>
+        </Card>
 
-        <section className={`panel list-panel view-panel ${activeView === "list" ? "is-active" : ""}`}>
-          <div className="panel-heading">
+        <Card as="section" className={`panel list-panel view-panel ${activeView === "list" ? "is-active" : ""}`}>
+          <Card.Header className="panel-heading">
             <div>
               <p className="eyebrow">次の予約</p>
               <h2>これからの予約</h2>
             </div>
-            <button className="icon-button accent" type="button" onClick={() => setActiveView("reserve")} aria-label="予約を追加" title="予約を追加">
-              <Plus size={20} />
-            </button>
-          </div>
+            <Button variant="primary" className="icon-button accent" type="button" onClick={() => setActiveView("reserve")} aria-label="予約を追加" title="予約を追加">
+              <AppIcon name="plus-lg" size={20} />
+            </Button>
+          </Card.Header>
 
           <div className="booking-list">
             {upcomingReservations.length === 0 ? (
               <div className="empty-state">
-                <CalendarDays size={24} />
+                <AppIcon name="calendar3" size={24} />
                 <strong>予約はまだありません</strong>
               </div>
             ) : (
@@ -1436,29 +1455,30 @@ export default function App() {
                       </span>
                       <h3>{reservation.title || "車を使う"}</h3>
                       <p>
-                        <Clock3 size={15} />
+                        <AppIcon name="clock" size={15} />
                         {formatReservationRange(reservation)}
                       </p>
                       {reservation.notes ? <p className="note-text">{reservation.notes}</p> : null}
                     </div>
                     {canManage ? (
                       <div className="card-actions">
-                        <button className="icon-button" type="button" onClick={() => editReservation(reservation)} aria-label="編集" title="編集">
-                          <Edit3 size={18} />
-                        </button>
-                        <button
+                        <Button variant="light" className="icon-button" type="button" onClick={() => editReservation(reservation)} aria-label="編集" title="編集">
+                          <AppIcon name="pencil" size={18} />
+                        </Button>
+                        <Button
+                          variant="outline-danger"
                           className="icon-button danger"
                           type="button"
                           onClick={() => deleteReservation(reservation.id)}
                           aria-label="削除"
                           title="削除"
                         >
-                          <Trash2 size={18} />
-                        </button>
+                          <AppIcon name="trash3" size={18} />
+                        </Button>
                       </div>
                     ) : (
                       <div className="locked-owner" title="ほかの人の予約です">
-                        <Lock size={17} />
+                        <AppIcon name="lock-fill" size={17} />
                         <span>ほかの人</span>
                       </div>
                     )}
@@ -1467,46 +1487,48 @@ export default function App() {
               })
             )}
           </div>
-        </section>
+        </Card>
 
-        <section className={`panel settings-panel view-panel ${activeView === "settings" ? "is-active" : ""}`}>
-          <div className="panel-heading">
+        <Card as="section" className={`panel settings-panel view-panel ${activeView === "settings" ? "is-active" : ""}`}>
+          <Card.Header className="panel-heading">
             <div>
               <p className="eyebrow">設定</p>
               <h2>グループとプロフィール</h2>
             </div>
-          </div>
+          </Card.Header>
 
           <div className="settings-form">
-            <form onSubmit={saveGroupName} className="settings-block">
-              <label className="field">
-                <span>車名・グループ名</span>
-                <input
+            <Form onSubmit={saveGroupName} className="settings-block">
+              <Form.Group className="field" controlId="settings-group-name">
+                <Form.Label>車名・グループ名</Form.Label>
+                <Form.Control
                   value={groupNameSettingDraft}
                   onChange={(event) => setGroupNameSettingDraft(event.target.value)}
                   maxLength={28}
                 />
-              </label>
-              <button className="ghost-button" type="submit" disabled={profileSaving}>
-                <Save size={18} />
+              </Form.Group>
+              <Button variant="outline-secondary" className="ghost-button" type="submit" disabled={profileSaving}>
+                {profileSaving ? <Spinner size="sm" animation="border" aria-hidden="true" /> : null}
+                <AppIcon name="floppy" size={18} />
                 <span>保存</span>
-              </button>
-            </form>
+              </Button>
+            </Form>
 
-            <form onSubmit={saveDisplayName} className="settings-block">
-              <label className="field">
-                <span>自分の表示名</span>
-                <input
+            <Form onSubmit={saveDisplayName} className="settings-block">
+              <Form.Group className="field" controlId="settings-display-name">
+                <Form.Label>自分の表示名</Form.Label>
+                <Form.Control
                   value={displayNameDraft}
                   onChange={(event) => setDisplayNameDraft(event.target.value)}
                   maxLength={20}
                 />
-              </label>
-              <button className="ghost-button" type="submit" disabled={profileSaving}>
-                <Save size={18} />
+              </Form.Group>
+              <Button variant="outline-secondary" className="ghost-button" type="submit" disabled={profileSaving}>
+                {profileSaving ? <Spinner size="sm" animation="border" aria-hidden="true" /> : null}
+                <AppIcon name="floppy" size={18} />
                 <span>保存</span>
-              </button>
-            </form>
+              </Button>
+            </Form>
 
             <div className="settings-block">
               <span className="field-label">メンバー</span>
@@ -1531,12 +1553,12 @@ export default function App() {
               />
             </div>
 
-            <button className="ghost-button danger-outline" type="button" onClick={logout}>
-              <LogOut size={18} />
+            <Button variant="outline-danger" className="ghost-button danger-outline" type="button" onClick={logout}>
+              <AppIcon name="box-arrow-right" size={18} />
               <span>ログアウト</span>
-            </button>
+            </Button>
           </div>
-        </section>
+        </Card>
       </main>
     </div>
   );
