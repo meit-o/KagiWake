@@ -164,13 +164,19 @@ a:focus-visible {
   display: grid;
   width: 48px;
   height: 48px;
-  place-items: center;
-  color: #ffffff;
-  background: #2563eb;
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
+  place-items: stretch;
+  background: transparent;
+  border-radius: 12px;
+  overflow: hidden;
   flex: 0 0 auto;
   transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .brand-mark:hover {

@@ -788,7 +788,7 @@ export default function App() {
         <Card className="auth-card">
           <Card.Body>
           <div className="brand-mark" aria-hidden="true">
-            <AppIcon name="car-front-fill" size={26} />
+            <img src="/brand-logo.png" alt="" />
           </div>
           <h1>共有車予約</h1>
           <p className="auth-lead">家族や仲間と車のスケジュールを共有しましょう。</p>
@@ -882,7 +882,7 @@ export default function App() {
         <Card className="auth-card">
           <Card.Body>
           <div className="brand-mark" aria-hidden="true">
-            <AppIcon name="people-fill" size={26} />
+            <img src="/brand-logo.png" alt="" />
           </div>
           <h1>グループを設定</h1>
           <p className="auth-lead">{user.username}さん、車を共有するグループを作るか、招待されたグループに参加してください。</p>
@@ -980,7 +980,7 @@ export default function App() {
         <Card className="auth-card">
           <Card.Body>
           <div className="brand-mark" aria-hidden="true">
-            <AppIcon name="check-lg" size={26} />
+            <img src="/brand-logo.png" alt="" />
           </div>
           <h1>グループを作成しました</h1>
           <p className="auth-lead">このコードやリンクを家族に共有すると、みんなで予約カレンダーを使えます。</p>
@@ -1028,7 +1028,7 @@ export default function App() {
       <header className="app-header">
         <div className="brand-area">
           <div className="brand-mark" aria-hidden="true">
-            <AppIcon name="car-front-fill" size={26} />
+            <img src="/brand-logo.png" alt="" />
           </div>
           <div>
             <p className="eyebrow">共有車カレンダー</p>
